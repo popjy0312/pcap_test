@@ -1,5 +1,7 @@
 #include <pcap.h>
 #include <stdio.h>
+#include <net/ethernet.h>   /* for struct ether_header */
+#include <netinet/ip.h>
 
 int main(int argc, char *argv[])
 {
@@ -10,10 +12,11 @@ int main(int argc, char *argv[])
     char filter_exp[] = "port 80";  /* The filter expression */
     bpf_u_int32 mask;       /* Our netmask */
     bpf_u_int32 net;        /* Our IP */
-    struct pcap_pkthdr* pheader;  /* The header that pcap gives us */
+    struct pcap_pkthdr* pheader;  /* The header pointer that pcap gives us */
     const u_char *packet;       /* The actual packet */
-    struct ether_header* pethr;
-    int res;
+    struct ether_header* peth_hdr;  /* ehternet header pointer */
+    int res;    /* check grab packet success */
+    int i;      /* index temp variable */
 
     /* Define the device */
     dev = pcap_lookupdev(errbuf);
@@ -50,6 +53,23 @@ int main(int argc, char *argv[])
             continue;
         /* Print its length */
         printf("Jacked a packet with length of [%d]\n", pheader->len);
+        
+        peth_hdr = (struct ether_header*) packet;
+        
+        /* print Source MAC address */
+        printf("Ethernet Source MAC address\n");
+        for(i=0;i<ETHER_ADDR_LEN;i++){
+            printf("%02x",peth_hdr->ether_shost[i]);
+            printf( (i==5)?"\n":":" );
+        }
+        
+        /* print Dest MAC address */
+        printf("Ethernet Dest MAC address\n");
+        for(i=0;i<ETHER_ADDR_LEN;i++){
+            printf("%02x",peth_hdr->ether_dhost[i]);
+            printf( (i==5)?"\n":":" );
+        }
+
     }
     pcap_close(handle);
     return(0);
