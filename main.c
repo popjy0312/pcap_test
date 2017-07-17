@@ -68,13 +68,19 @@ int main(int argc, char *argv[])
         printf("%s\n",ether_ntoa((struct ether_addr*)&peth_hdr->ether_dhost));
 
         /* IPv4 */
-        if( peth_hdr->ether_type == ETHERTYPE_IP){
+        if( ntohs(peth_hdr->ether_type) == ETHERTYPE_IP){
             pip_hdr = (struct ip*)(packet + sizeof(struct ether_header));
 
             /* print Source IP address */
             printf("Source IP address\n");
             printf("%s\n", inet_ntoa(pip_hdr->ip_src));
+
+            /* print Dest IP address */
+            printf("Dest IP address\n");
+            printf("%s\n", inet_ntoa(pip_hdr->ip_dst));
         }
+
+        printf("------------------------------------------------------\n");
 
     }
     pcap_close(handle);
