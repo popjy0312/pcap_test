@@ -3,6 +3,7 @@
 #include <net/ethernet.h>   /* for struct ether_header */
 #include <netinet/ether.h>  /* for ether_ntoa */
 #include <netinet/ip.h>     /* for struct ip */
+#include <netinet/tcp.h>    /* for struct tcphdr */
 #include <arpa/inet.h>      /* for inet_ntoa */
 
 int main(int argc, char *argv[])
@@ -18,6 +19,7 @@ int main(int argc, char *argv[])
     const u_char *packet;       /* The actual packet */
     struct ether_header* peth_hdr;  /* ehternet header pointer */
     struct ip* pip_hdr;  /* ip header pointer */
+    struct tcphdr* ptcp_hdr;   /* tcp header pointer */
     int res;    /* check grab packet success */
     int i;      /* index temp variable */
 
@@ -78,6 +80,18 @@ int main(int argc, char *argv[])
             /* print Dest IP address */
             printf("Dest IP address\n");
             printf("%s\n", inet_ntoa(pip_hdr->ip_dst));
+
+            if( pip_hdr->ip_p == IPPROTO_TCP){
+                ptcp_hdr = (struct tcphdr*)((char*)pip_hdr + (pip_hdr->ip_hl&0xf)*4);
+
+                /* print Source Port */
+                printf("TCP Source Port\n");
+                printf("%d\n",ntohs(ptcp_hdr->source));
+
+                /* print Dest Port */
+                printf("TCP Dest Port\n");
+                printf("%d\n",ntohs(ptcp_hdr->dest));
+            }
         }
 
         printf("------------------------------------------------------\n");
