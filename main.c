@@ -61,19 +61,11 @@ int main(int argc, char *argv[])
 
         /* print Source MAC address */
         printf("Ethernet Source MAC address\n");
-        for(i=0;i<ETHER_ADDR_LEN;i++){
-            printf("%02X",peth_hdr->ether_shost[i]);
-            printf( (i==5)?"\n":":" );
-        }
+        printf("%s\n",ether_ntoa((struct ether_addr*)&peth_hdr->ether_shost));
 
         /* print Dest MAC address */
         printf("Ethernet Dest MAC address\n");
-        /*  
-        for(i=0;i<ETHER_ADDR_LEN;i++){
-            printf("%02X",peth_hdr->ether_dhost[i]);
-            printf( (i==5)?"\n":":" );
-        }*/
-        printf("%s\n", ether_ntoa((struct ether_addr*)peth_hdr->ether_dhost));
+        printf("%s\n",ether_ntoa((struct ether_addr*)&peth_hdr->ether_dhost));
 
         /* IPv4 */
         if( peth_hdr->ether_type == ETHERTYPE_IP){
