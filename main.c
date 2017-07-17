@@ -5,6 +5,7 @@
 #include <netinet/ip.h>     /* for struct ip */
 #include <netinet/tcp.h>    /* for struct tcphdr */
 #include <arpa/inet.h>      /* for inet_ntoa */
+#include <ctype.h>          /* for isprint */
 
 int main(int argc, char *argv[])
 {
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
     struct ether_header* peth_hdr;  /* ehternet header pointer */
     struct ip* pip_hdr;  /* ip header pointer */
     struct tcphdr* ptcp_hdr;   /* tcp header pointer */
+    u_char *data;      /* tcp data pointer */
     int res;    /* check grab packet success */
     int i;      /* index temp variable */
 
@@ -61,6 +63,7 @@ int main(int argc, char *argv[])
 
         peth_hdr = (struct ether_header*) packet;
 
+        printf("\n****Ethernet Information****\n");
         /* print Source MAC address */
         printf("Ethernet Source MAC address\n");
         printf("%s\n",ether_ntoa((struct ether_addr*)&peth_hdr->ether_shost));
@@ -73,6 +76,7 @@ int main(int argc, char *argv[])
         if( ntohs(peth_hdr->ether_type) == ETHERTYPE_IP){
             pip_hdr = (struct ip*)(packet + sizeof(struct ether_header));
 
+            printf("\n****IPv4 Information****\n");
             /* print Source IP address */
             printf("Source IP address\n");
             printf("%s\n", inet_ntoa(pip_hdr->ip_src));
@@ -84,6 +88,7 @@ int main(int argc, char *argv[])
             if( pip_hdr->ip_p == IPPROTO_TCP){
                 ptcp_hdr = (struct tcphdr*)((char*)pip_hdr + (pip_hdr->ip_hl&0xf)*4);
 
+                printf("\n****TCP Information****\n");
                 /* print Source Port */
                 printf("TCP Source Port\n");
                 printf("%d\n",ntohs(ptcp_hdr->source));
@@ -91,6 +96,15 @@ int main(int argc, char *argv[])
                 /* print Dest Port */
                 printf("TCP Dest Port\n");
                 printf("%d\n",ntohs(ptcp_hdr->dest));
+
+                /* print some data */
+                printf("Data preview: \n");
+                data = (char*)((char*)ptcp_hdr + (ptcp_hdr->doff&0xf)*4);
+
+                for(i=0;i<16;i++){
+                    printf("%c",isprint(data[i])?data[i]:'.');
+                }
+                printf("\n");
             }
         }
 
