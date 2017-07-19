@@ -12,12 +12,11 @@ int main(int argc, char *argv[])
 {
     pcap_t *handle;         /* Session handle */
     char *dev;          /* The device to sniff on */
-    char errbuf[PCAP_ERRBUF_SIZE];  /* Error string */
     struct bpf_program fp;      /* The compiled filter */
+    char errbuf[PCAP_ERRBUF_SIZE];  /* Error string */
     char filter_exp[] = "port 80";  /* The filter expression */
-    bpf_u_int32 mask;       /* Our netmask */
-    bpf_u_int32 net;        /* Our IP */
     struct pcap_pkthdr* pheader;  /* The header pointer that pcap gives us */
+    bpf_u_int32 net;        /* Our IP */
     const u_char *packet;       /* The actual packet */
     struct ether_header* peth_hdr;  /* ehternet header pointer */
     struct ip* pip_hdr;  /* ip header pointer */
@@ -25,6 +24,7 @@ int main(int argc, char *argv[])
     u_char *data;      /* tcp data pointer */
     uint32_t res;    /* check grab packet success */
     uint32_t i;      /* index temp variable */
+    uint32_t data_len;  /* length of tcp data */
 
     if(argc != 2){
         printf("usage : ./pcap interface\n");
@@ -32,12 +32,6 @@ int main(int argc, char *argv[])
     }
     /* Define the device */
     dev = argv[1];
-    /* Find the properties for the device */
-    if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1) {
-        fprintf(stderr, "Couldn't get netmask for device %s: %s\n", dev, errbuf);
-        net = 0;
-        mask = 0;
-    }
     /* Open the session in promiscuous mode */
     handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
     if (handle == NULL) {
@@ -100,12 +94,12 @@ int main(int argc, char *argv[])
 
                 /* print some data */
                 data = (char*)ptcp_hdr + ptcp_hdr->doff*4;
-                uint32_t data_len = (uint32_t)htons(pip_hdr->ip_len) - (uint32_t)pip_hdr->ip_hl-(uint32_t)ptcp_hdr->doff;
-                data_len *= 4;
+
+                data_len = (uint32_t)htons(pip_hdr->ip_len) - (uint32_t)pip_hdr->ip_hl*4-(uint32_t)ptcp_hdr->doff*4;
                 printf("\n****Data (len: %d)**** \n",data_len);
                 for(i=0;i<data_len;i++){
                     printf("%c",isprint(data[i])?data[i]:'.');
-                    if(!(i&0x1f ^ 0x1f))
+                    if(!(i&0x1f ^ 0x1f))    /* new line every 32 bytes */
                         printf("\n");
                 }
                 printf("\n");
