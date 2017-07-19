@@ -25,7 +25,9 @@ int main(int argc, char *argv[])
     uint32_t res;    /* check grab packet success */
     uint32_t i;      /* index temp variable */
     uint32_t data_len;  /* length of tcp data */
+    char inet_addr_buf[INET_ADDRSTRLEN];  /* for inet_ntop */
 
+    /* need argument */
     if(argc != 2){
         printf("usage : ./pcap interface\n");
         return -1;
@@ -74,11 +76,13 @@ int main(int argc, char *argv[])
             printf("\n****IPv4 Information****\n");
             /* print Source IP address */
             printf("Source IP address\n");
-            printf("%s\n", inet_ntoa(pip_hdr->ip_src));
+            inet_ntop(AF_INET, &pip_hdr->ip_src, inet_addr_buf, INET_ADDRSTRLEN);
+            printf("%s\n", inet_addr_buf);
 
             /* print Dest IP address */
             printf("Dest IP address\n");
-            printf("%s\n", inet_ntoa(pip_hdr->ip_dst));
+            inet_ntop(AF_INET, &pip_hdr->ip_dst, inet_addr_buf, INET_ADDRSTRLEN);
+            printf("%s\n", inet_addr_buf);
 
             if( pip_hdr->ip_p == IPPROTO_TCP){
                 ptcp_hdr = (struct tcphdr*)((char*)pip_hdr + pip_hdr->ip_hl*4);
