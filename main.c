@@ -6,6 +6,7 @@
 #include <netinet/tcp.h>    /* for struct tcphdr */
 #include <arpa/inet.h>      /* for inet_ntoa */
 #include <ctype.h>          /* for isprint */
+#include <stdint.h>         /* for uint16_t, uint32_t, ... */
 
 int main(int argc, char *argv[])
 {
@@ -22,15 +23,15 @@ int main(int argc, char *argv[])
     struct ip* pip_hdr;  /* ip header pointer */
     struct tcphdr* ptcp_hdr;   /* tcp header pointer */
     u_char *data;      /* tcp data pointer */
-    int res;    /* check grab packet success */
-    int i;      /* index temp variable */
+    uint32_t res;    /* check grab packet success */
+    uint32_t i;      /* index temp variable */
 
-    /* Define the device */
-    dev = pcap_lookupdev(errbuf);
-    if (dev == NULL) {
-        fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
-        return(2);
+    if(argc != 2){
+        printf("usage : ./pcap interface\n");
+        return -1;
     }
+    /* Define the device */
+    dev = argv[1];
     /* Find the properties for the device */
     if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1) {
         fprintf(stderr, "Couldn't get netmask for device %s: %s\n", dev, errbuf);
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
             printf("%s\n", inet_ntoa(pip_hdr->ip_dst));
 
             if( pip_hdr->ip_p == IPPROTO_TCP){
-                ptcp_hdr = (struct tcphdr*)((char*)pip_hdr + (pip_hdr->ip_hl&0xf)*4);
+                ptcp_hdr = (struct tcphdr*)((char*)pip_hdr + pip_hdr->ip_hl*4);
 
                 printf("\n****TCP Information****\n");
                 /* print Source Port */
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 
                 /* print some data */
                 printf("Data preview: \n");
-                data = (char*)((char*)ptcp_hdr + (ptcp_hdr->doff&0xf)*4);
+                data = (char*)ptcp_hdr + ptcp_hdr->doff*4;
 
                 for(i=0;i<16;i++){
                     printf("%c",isprint(data[i])?data[i]:'.');
