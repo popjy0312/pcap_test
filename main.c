@@ -8,6 +8,8 @@
 #include <ctype.h>          /* for isprint */
 #include <stdint.h>         /* for uint16_t, uint32_t, ... */
 
+#define ETHER_ADDRSTRLEN ETHER_ADDR_LEN * 3
+
 int main(int argc, char *argv[])
 {
     pcap_t *handle;         /* Session handle */
@@ -26,6 +28,7 @@ int main(int argc, char *argv[])
     uint32_t i;      /* index temp variable */
     uint32_t data_len;  /* length of tcp data */
     char inet_addr_buf[INET_ADDRSTRLEN];  /* for inet_ntop */
+    char ether_addr_buf[ETHER_ADDRSTRLEN];    /* for ether_ntoa_r */
 
     /* need argument */
     if(argc != 2){
@@ -63,11 +66,13 @@ int main(int argc, char *argv[])
         printf("\n****Ethernet Information****\n");
         /* print Source MAC address */
         printf("Ethernet Source MAC address\n");
-        printf("%s\n",ether_ntoa((struct ether_addr*)&peth_hdr->ether_shost));
+        ether_ntoa_r((struct ether_addr*)&peth_hdr->ether_shost, ether_addr_buf);
+        printf("%s\n",ether_addr_buf);
 
         /* print Dest MAC address */
         printf("Ethernet Dest MAC address\n");
-        printf("%s\n",ether_ntoa((struct ether_addr*)&peth_hdr->ether_dhost));
+        ether_ntoa_r((struct ether_addr*)&peth_hdr->ether_dhost, ether_addr_buf);
+        printf("%s\n",ether_addr_buf);
 
         /* IPv4 */
         if( ntohs(peth_hdr->ether_type) == ETHERTYPE_IP){
