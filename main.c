@@ -99,11 +99,14 @@ int main(int argc, char *argv[])
                 printf("%d\n",ntohs(ptcp_hdr->dest));
 
                 /* print some data */
-                printf("Data preview: \n");
                 data = (char*)ptcp_hdr + ptcp_hdr->doff*4;
-
-                for(i=0;i<16;i++){
+                uint32_t data_len = (uint32_t)htons(pip_hdr->ip_len) - (uint32_t)pip_hdr->ip_hl-(uint32_t)ptcp_hdr->doff;
+                data_len *= 4;
+                printf("\n****Data (len: %d)**** \n",data_len);
+                for(i=0;i<data_len;i++){
                     printf("%c",isprint(data[i])?data[i]:'.');
+                    if(!(i&0x1f ^ 0x1f))
+                        printf("\n");
                 }
                 printf("\n");
             }
