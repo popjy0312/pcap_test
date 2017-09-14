@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
                 printf("\n****Data (len: %d)**** \n",data_len);
                 for(i=0;i<data_len;i++){
                     printf("%c",isprint(data[i])?data[i]:'.');
-                    if(!(i&0x1f ^ 0x1f))    /* new line every 32 bytes */
+                    if(i % 32 == 0)    /* new line every 32 bytes */
                         printf("\n");
                 }
                 printf("\n");
